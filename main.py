@@ -2,6 +2,9 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 #from dataclasses import dataclass
 from panda3d.core import ClockObject
+from sys import executable as path
+
+print(f"DEBUG :: {path} :: PATH")
 
 app = Ursina(title = 'TinyCube - Minecraft clone made by SpookScoop93')
 app.sky = Sky(color=color.hex('#6EB1FF'), texture=None)
@@ -9,8 +12,8 @@ window.vsync = False
 globalClock.setMode(ClockObject.MLimited)
 globalClock.setFrameRate(30)
 
-
-blocks = ['cobblestone', 'grass']
+break_sound = Audio('block', autoplay=False)
+blocks = ['cobblestone', 'grass', 'planks', 'snow', 'bricks']
 selected_block = 0
 block_selected = 0
 
@@ -24,6 +27,9 @@ class block(Button):
                          color=color.hsv(0, 0, random.uniform(.9, 1.0)),
                          highlight_color=color.lime,
                          )
+        break_sound.play()
+    def on_destroy(self):
+        break_sound.play()
 
 # World
 X_MAX:int = 16
@@ -46,12 +52,16 @@ for x in range(X_MAX):
 
 help_text = Text(text='LMB - place, RMB - destroy, ESC - quit', origin=(0,0), scale=2, y=0.4)
 invoke(setattr, help_text, 'enabled', False, delay=20)
+copyright_text = Text(text='All assets are property of Mojang.', origin=(-0.5,-0.5), scale=0.5, y=-0.45, x=-0.8)
 
 block_panel = WindowPanel(
         title='Block Select',
         content=[
             Button(text='Cobblestone', on_click=Func(globals().__setitem__, 'block_selected', 0)),
             Button(text='Grass', on_click=Func(globals().__setitem__, 'block_selected', 1)),
+            Button(text='Planks', on_click=Func(globals().__setitem__, 'block_selected', 2)),
+            Button(text='Snow', on_click=Func(globals().__setitem__, 'block_selected', 3)),
+            Button(text='Bricks', on_click=Func(globals().__setitem__, 'block_selected', 4)),
             ],
         enabled=False,
         y=0.1
