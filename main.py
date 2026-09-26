@@ -17,6 +17,32 @@ blocks = ['cobblestone', 'grass', 'planks', 'snow', 'bricks']
 selected_block = 0
 block_selected = 0
 
+class DebugOverlay(Entity):
+    def __init__(self):
+        super().__init__()
+        self.debug_text = Text(text="", position=window.top_left, origin=(-0.5,0.5), scale=0.5, background=True)
+
+    def update(self):
+        self.debug_text.text = f"""[info]
+player :: X={player.x:.1f}, Y={player.y:.1f}, Z={player.z:.1f}
+current block :: {blocks[block_selected]}
+[movement]
+wasd / mouse - move
+space - jump
+LMB - destroy
+RMB - build
+e - blocks menu
+esc - free mouse"""
+
+
+class Player(FirstPersonController):
+    def update(self):
+        super().update()
+        if self.y < -70:
+            self.y = 100
+            self.x = 0
+            self.z = 0
+
 class block(Button):
     def __init__(self, position=(0,0,0), texture='grass'):
         super().__init__(parent=scene,
@@ -52,6 +78,9 @@ for x in range(X_MAX):
 
 help_text = Text(text='LMB - place, RMB - destroy, ESC - quit', origin=(0,0), scale=2, y=0.4)
 invoke(setattr, help_text, 'enabled', False, delay=20)
+
+hud = DebugOverlay()
+
 copyright_text = Text(text='All assets are property of Mojang.', origin=(-0.5,-0.5), scale=0.5, y=-0.45, x=-0.8)
 
 block_panel = WindowPanel(
@@ -84,11 +113,12 @@ def input(key):
         mouse.locked = not mouse.locked
 
     if key == 'e':
+        mouse.locked = not mouse.locked
         block_panel.enabled = not block_panel.enabled
 
     selected_block = block_selected
 
-player = FirstPersonController()
+player = Player()
 player.cursor.enabled = False
 
 app.run()
