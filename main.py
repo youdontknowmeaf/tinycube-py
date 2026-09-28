@@ -13,9 +13,9 @@ globalClock.setMode(ClockObject.MLimited)
 globalClock.setFrameRate(30)
 
 break_sound = Audio('block', autoplay=False)
-blocks = ['cobblestone', 'grass', 'planks', 'snow', 'bricks']
-selected_block = 0
-block_selected = 0
+blocks = ['air', 'cobblestone', 'grass', 'planks', 'snow', 'bricks']
+selected_block = 1
+block_selected = 1
 
 class DebugOverlay(Entity):
     def __init__(self):
@@ -48,7 +48,7 @@ class block(Button):
         super().__init__(parent=scene,
                          position=position,
                          model='cube',
-                         origin_y=5,
+                         origin_y=0.5,
                          texture=texture,
                          color=color.hsv(0, 0, random.uniform(.9, 1.0)),
                          highlight_color=color.lime,
@@ -58,6 +58,29 @@ class block(Button):
         break_sound.play()
 
 # World
+world = {}
+
+def scan_blocks(x, y, z):
+    global world
+    tmpw = {
+    'l' : world.get((x -1,    y,      z   ), 0),
+    'r' : world.get((x +1,    y,      z   ), 0),
+    'd' : world.get((x,       y -1,   z   ), 0),
+    'u' : world.get((x,       y +1,   z   ), 0),
+    'b' : world.get((x,       y,      z -1), 0),
+    'a' : world.get((x,       y,      z +1), 0)
+    }
+
+    vis = False
+    for d, i in tmpw.items():
+        if i == 0:
+            vis = True
+            break
+
+    ent = world.get((x, y, z))
+    if ent:
+        ent.enabled = vis
+
 X_MAX:int = 16
 Y_MAX:int = 6
 Z_MAX:int = 16
@@ -73,8 +96,12 @@ def set_Y_block(y: int):
 for x in range(X_MAX):
     for z in range(Z_MAX):
         for y in range(Y_MAX):
-            blok = block(position=(x,y,z),texture=set_Y_block(y))
+            world[(x, y, z)] = block(position=(x,y,z),texture=set_Y_block(y))
 
+for x in range(X_MAX):
+    for z in range(Z_MAX):
+        for y in range(Y_MAX):
+            scan_blocks(x, y, z)
 
 help_text = Text(text='LMB - place, RMB - destroy, ESC - quit', origin=(0,0), scale=2, y=0.4)
 invoke(setattr, help_text, 'enabled', False, delay=20)
@@ -103,11 +130,21 @@ def input(key):
     if key == 'left mouse down':
         hit_info = raycast(camera.world_position, camera.forward, distance=5)
         if hit_info.hit:
-            block(position=hit_info.entity.position + hit_info.normal, texture=blocks[selected_block])
+            pos = hit_info.entity.position
+            world[(int(pos.x), int(pos.y),
+                   int(pos.z))] = block(position=pos + hit_info.normal, 
+                                        texture=blocks[selected_block])
+            scan_blocks(int(pos.x), int(pos.y), int(pos.z))
+            print(f"DEBUG :: {pos + hit_info.normal} :: BLOCK ADD")
 
     if key ==  'right mouse down' and mouse.hovered_entity:
-        if mouse.hovered_entity.parent == scene:
-            destroy(mouse.hovered_entity)
+        hit_info = raycast(camera.world_position, camera.forward)
+        pos = hit_info.entity.position
+        if hit_info.hit:
+            destroy(world[(int(pos.x), int(pos.y), int(pos.z))])
+            del world[(int(pos.x), int(pos.y), int(pos.z))]
+            scan_blocks(int(pos.x), int(pos.y), int(pos.z))
+            print(f"DEBUG :: {pos} :: BLOCK DEL")
 
     if key == 'escape':
         mouse.locked = not mouse.locked
