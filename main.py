@@ -76,10 +76,10 @@ def scan_blocks(x, y, z):
         if i == 0:
             vis = True
             break
-
-    ent = world.get((x, y, z))
-    if ent:
-        ent.enabled = vis
+        ent = world.get((x,
+ y, z))
+        if ent:
+            ent.enabled = vis
 
 X_MAX:int = 16
 Y_MAX:int = 6
