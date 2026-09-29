@@ -60,26 +60,31 @@ class block(Button):
 # World
 world = {}
 
-def scan_blocks(x, y, z):
+def scan_blocks(x, y, z, scan_neighbors=False):
     global world
-    tmpw = {
-    'l' : world.get((x -1,    y,      z   ), 0),
-    'r' : world.get((x +1,    y,      z   ), 0),
-    'd' : world.get((x,       y -1,   z   ), 0),
-    'u' : world.get((x,       y +1,   z   ), 0),
-    'b' : world.get((x,       y,      z -1), 0),
-    'a' : world.get((x,       y,      z +1), 0)
-    }
+    def update_single(ax, ay, az):
+        tmpw = {
+        'l' : world.get((ax -1,    ay,      az   ), 0),
+        'r' : world.get((ax +1,    ay,      az   ), 0),
+        'd' : world.get((ax,       ay -1,   az   ), 0),
+        'u' : world.get((ax,       ay +1,   az   ), 0),
+        'b' : world.get((ax,       ay,      az -1), 0),
+        'a' : world.get((ax,       ay,      az +1), 0)
+        }
+    
+        ent = world.get((ax, ay, az))
+        if ent:
+            ent.enabled = any(i == 0 for i in tmpw.values())
+    
+    update_single(x, y, z)
 
-    vis = False
-    for d, i in tmpw.items():
-        if i == 0:
-            vis = True
-            break
-
-    ent = world.get((x, y, z))
-    if ent:
-        ent.enabled = vis
+    if scan_neighbors:
+        for nx, ny, nz in [
+            (x - 1, y,     z), (x + 1, y,     z),
+            (x,     y - 1, z), (x,     y + 1, z),
+            (x,     y,     z - 1), (x,     y,     z + 1)
+        ]:
+            update_single(nx, ny, nz)
 
 X_MAX:int = 16
 Y_MAX:int = 6
@@ -130,12 +135,12 @@ def input(key):
     if key == 'left mouse down':
         hit_info = raycast(camera.world_position, camera.forward, distance=5)
         if hit_info.hit:
-            pos = hit_info.entity.position
+            pos = hit_info.entity.position + hit_info.normal
             world[(int(pos.x), int(pos.y),
-                   int(pos.z))] = block(position=pos + hit_info.normal, 
+                   int(pos.z))] = block(position=pos, 
                                         texture=blocks[selected_block])
             scan_blocks(int(pos.x), int(pos.y), int(pos.z))
-            print(f"DEBUG :: {pos + hit_info.normal} :: BLOCK ADD")
+            print(f"DEBUG :: {pos} :: BLOCK ADD")
 
     if key ==  'right mouse down' and mouse.hovered_entity:
         hit_info = raycast(camera.world_position, camera.forward)
@@ -143,7 +148,7 @@ def input(key):
         if hit_info.hit:
             destroy(world[(int(pos.x), int(pos.y), int(pos.z))])
             del world[(int(pos.x), int(pos.y), int(pos.z))]
-            scan_blocks(int(pos.x), int(pos.y), int(pos.z))
+            scan_blocks(int(pos.x), int(pos.y), int(pos.z), True)
             print(f"DEBUG :: {pos} :: BLOCK DEL")
 
     if key == 'escape':
