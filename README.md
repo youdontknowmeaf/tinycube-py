@@ -5,8 +5,13 @@ A small minecraft-like game inspired by Minecraft RD-XXXX, made in python3 with 
 Blocks:
 - Grass
 - Cobblestone
+- Bricks
+- Planks
+- Snow
+
 World:
 - Flat with simple render (grass on first 2 layers, then cobblestone)
+16x6x16 by default.
 
 # how to run (not from release)
 **Linux**
