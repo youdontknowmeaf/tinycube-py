@@ -118,11 +118,11 @@ copyright_text = Text(text='All assets are property of Mojang.', origin=(-0.5,-0
 block_panel = WindowPanel(
         title='Block Select',
         content=[
-            Button(text='Cobblestone', on_click=Func(globals().__setitem__, 'block_selected', 0)),
-            Button(text='Grass', on_click=Func(globals().__setitem__, 'block_selected', 1)),
-            Button(text='Planks', on_click=Func(globals().__setitem__, 'block_selected', 2)),
-            Button(text='Snow', on_click=Func(globals().__setitem__, 'block_selected', 3)),
-            Button(text='Bricks', on_click=Func(globals().__setitem__, 'block_selected', 4)),
+            Button(text='Cobblestone', on_click=Func(globals().__setitem__, 'block_selected', 1)),
+            Button(text='Grass', on_click=Func(globals().__setitem__, 'block_selected', 2)),
+            Button(text='Planks', on_click=Func(globals().__setitem__, 'block_selected', 3)),
+            Button(text='Snow', on_click=Func(globals().__setitem__, 'block_selected', 4)),
+            Button(text='Bricks', on_click=Func(globals().__setitem__, 'block_selected', 5)),
             ],
         enabled=False,
         y=0.1
